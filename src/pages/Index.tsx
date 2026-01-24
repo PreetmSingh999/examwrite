@@ -49,7 +49,7 @@ const Index = () => {
             isTyping={stats.isTyping}
           />
           <div className="flex justify-center">
-            <TimerGoal elapsedTime={stats.elapsedTime} isTyping={stats.isTyping} />
+            <TimerGoal />
           </div>
         </div>
 
