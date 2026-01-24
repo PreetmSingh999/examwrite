@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Timer, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,18 +8,34 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-interface TimerGoalProps {
-  elapsedTime: number;
-  isTyping: boolean;
-}
-
-export const TimerGoal = ({ elapsedTime, isTyping }: TimerGoalProps) => {
+export const TimerGoal = () => {
   const [goalMinutes, setGoalMinutes] = useState<string>('');
   const [goalSeconds, setGoalSeconds] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const remainingTime = goalSeconds !== null ? Math.max(0, goalSeconds - elapsedTime) : null;
   const isComplete = remainingTime === 0 && goalSeconds !== null;
+
+  // Real-time countdown timer
+  useEffect(() => {
+    if (remainingTime !== null && remainingTime > 0) {
+      timerRef.current = setInterval(() => {
+        setRemainingTime(prev => {
+          if (prev !== null && prev > 0) {
+            return prev - 1;
+          }
+          return 0;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [remainingTime !== null && remainingTime > 0]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -30,17 +46,25 @@ export const TimerGoal = ({ elapsedTime, isTyping }: TimerGoalProps) => {
   const handleSetGoal = useCallback(() => {
     const minutes = parseInt(goalMinutes, 10);
     if (!isNaN(minutes) && minutes > 0) {
-      setGoalSeconds(minutes * 60);
+      const totalSeconds = minutes * 60;
+      setGoalSeconds(totalSeconds);
+      setRemainingTime(totalSeconds);
       setIsOpen(false);
     }
   }, [goalMinutes]);
 
   const handleClearGoal = useCallback(() => {
     setGoalSeconds(null);
+    setRemainingTime(null);
     setGoalMinutes('');
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
   }, []);
 
-  const progress = goalSeconds !== null ? ((goalSeconds - (remainingTime ?? 0)) / goalSeconds) * 100 : 0;
+  const progress = goalSeconds !== null && remainingTime !== null 
+    ? ((goalSeconds - remainingTime) / goalSeconds) * 100 
+    : 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -103,7 +127,9 @@ export const TimerGoal = ({ elapsedTime, isTyping }: TimerGoalProps) => {
                     size="sm"
                     className="text-xs px-2 py-1 h-7"
                     onClick={() => {
-                      setGoalSeconds(mins * 60);
+                      const totalSeconds = mins * 60;
+                      setGoalSeconds(totalSeconds);
+                      setRemainingTime(totalSeconds);
                       setIsOpen(false);
                     }}
                   >
