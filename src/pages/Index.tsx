@@ -30,7 +30,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Writing Notepad
+                ExamWrite
               </h1>
               <p className="text-sm text-muted-foreground">
                 Write freely. Get instant feedback.
