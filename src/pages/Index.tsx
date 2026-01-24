@@ -4,6 +4,7 @@ import { WritingEditor } from '@/components/WritingEditor';
 import { WritingStats } from '@/components/WritingStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AISuggestions } from '@/components/AISuggestions';
+import { TimerGoal } from '@/components/TimerGoal';
 import { Button } from '@/components/ui/button';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useTheme } from '@/hooks/useTheme';
@@ -40,13 +41,16 @@ const Index = () => {
         </header>
 
         {/* Stats Bar */}
-        <div className="mb-6">
+        <div className="mb-6 space-y-3">
           <WritingStats
             wordCount={stats.wordCount}
             typingSpeed={stats.typingSpeed}
             elapsedTime={stats.elapsedTime}
             isTyping={stats.isTyping}
           />
+          <div className="flex justify-center">
+            <TimerGoal elapsedTime={stats.elapsedTime} isTyping={stats.isTyping} />
+          </div>
         </div>
 
         {/* Editor */}
