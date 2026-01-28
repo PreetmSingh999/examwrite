@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PenLine, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { WritingEditor } from '@/components/WritingEditor';
 import { WritingStats } from '@/components/WritingStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -10,7 +11,6 @@ import { TextSummarizer } from '@/components/TextSummarizer';
 import { Button } from '@/components/ui/button';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useTheme } from '@/hooks/useTheme';
-import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [text, setText] = useState('');
@@ -25,7 +25,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 py-6 md:py-10">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
         {/* Header */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-3">
@@ -57,43 +57,61 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex gap-4 relative">
-          {/* AI Tools Panel - Left Side */}
-          <div
-            className={cn(
-              "transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0",
-              showAITools ? "w-80 opacity-100" : "w-0 opacity-0"
-            )}
-          >
-            <div className="w-80 space-y-4">
-              <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
-              <TextSummarizer text={text} />
-            </div>
-          </div>
-
+        {/* Main Content Area with Resizable Panels */}
+        <div className="relative">
           {/* Toggle Button */}
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             onClick={() => setShowAITools(!showAITools)}
-            className="absolute -left-3 top-4 z-10 h-8 w-8 rounded-full shadow-md bg-background border-border"
+            className="mb-3 gap-2"
           >
             {showAITools ? (
-              <ChevronLeft className="h-4 w-4" />
+              <>
+                <ChevronLeft className="h-4 w-4" />
+                Hide AI Tools
+              </>
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <>
+                <ChevronRight className="h-4 w-4" />
+                Show AI Tools
+              </>
             )}
           </Button>
 
-          {/* Editor - Main Area */}
-          <div className="flex-1 min-w-0">
-            <WritingEditor
-              text={text}
-              onChange={setText}
-              placeholder="Begin your writing journey here... The timer will start when you type and pause when you stop. Your words per minute will be calculated based on your active writing time."
-            />
-          </div>
+          {showAITools ? (
+            <ResizablePanelGroup orientation="horizontal" className="min-h-[500px] rounded-lg border">
+              {/* AI Tools Panel */}
+              <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
+                <div className="h-full p-3 flex flex-col gap-4 overflow-auto">
+                  <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
+                  <TextSummarizer editorText={text} />
+                </div>
+              </ResizablePanel>
+
+              {/* Resize Handle */}
+              <ResizableHandle withHandle />
+
+              {/* Editor Panel */}
+              <ResizablePanel defaultSize={65} minSize={40}>
+                <div className="h-full p-3">
+                  <WritingEditor
+                    text={text}
+                    onChange={setText}
+                    placeholder="Begin your writing journey here... The timer will start when you type and pause when you stop. Your words per minute will be calculated based on your active writing time."
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          ) : (
+            <div className="min-h-[400px]">
+              <WritingEditor
+                text={text}
+                onChange={setText}
+                placeholder="Begin your writing journey here... The timer will start when you type and pause when you stop. Your words per minute will be calculated based on your active writing time."
+              />
+            </div>
+          )}
         </div>
 
         {/* Grammar & Tips */}
