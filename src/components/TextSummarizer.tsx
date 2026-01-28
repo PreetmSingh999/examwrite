@@ -9,28 +9,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface TextSummarizerProps {
-  editorText?: string;
+  text: string;
 }
 
-export const TextSummarizer = ({ editorText = '' }: TextSummarizerProps) => {
-  const [inputText, setInputText] = useState('');
+export const TextSummarizer = ({ text }: TextSummarizerProps) => {
   const [wordLimit, setWordLimit] = useState('50');
   const [summary, setSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Use input text if provided, otherwise fall back to editor text
-  const textToSummarize = inputText.trim() || editorText.trim();
-  const currentWordCount = textToSummarize ? textToSummarize.split(/\s+/).length : 0;
-
   const handleSummarize = async () => {
-    if (!textToSummarize) {
-      toast.error('Please paste or write some text to summarize');
+    if (!text.trim()) {
+      toast.error('Please write some text in the editor first');
       return;
     }
 
-    if (currentWordCount < 20) {
-      toast.error('Please provide at least 20 words to summarize');
+    const wordCount = text.trim().split(/\s+/).length;
+    if (wordCount < 20) {
+      toast.error('Please write at least 20 words to summarize');
       return;
     }
 
@@ -45,7 +41,7 @@ export const TextSummarizer = ({ editorText = '' }: TextSummarizerProps) => {
 
     try {
       const { data, error } = await supabase.functions.invoke('summarize-text', {
-        body: { text: textToSummarize, wordLimit: limit }
+        body: { text, wordLimit: limit }
       });
 
       if (error) {
@@ -75,30 +71,24 @@ export const TextSummarizer = ({ editorText = '' }: TextSummarizerProps) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const currentWordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+
   return (
-    <Card className="border-border/50 h-full flex flex-col">
+    <Card className="border-border/50">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
           Summarize Text
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 flex-1 flex flex-col">
-        <div className="space-y-1.5 flex-1">
-          <Label htmlFor="inputText">Text to summarize</Label>
-          <Textarea
-            id="inputText"
-            placeholder="Paste or type text here to summarize..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            className="min-h-[100px] flex-1 resize-none"
-          />
-          <p className="text-xs text-muted-foreground">{currentWordCount} words</p>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>Current text: {currentWordCount} words</span>
         </div>
 
         <div className="flex gap-3 items-end">
           <div className="flex-1 space-y-1.5">
-            <Label htmlFor="wordLimit">Target words</Label>
+            <Label htmlFor="wordLimit">Target word limit</Label>
             <Input
               id="wordLimit"
               type="number"
@@ -127,7 +117,7 @@ export const TextSummarizer = ({ editorText = '' }: TextSummarizerProps) => {
             <Textarea
               value={summary}
               readOnly
-              className="min-h-[80px] resize-none bg-muted/30"
+              className="min-h-[120px] resize-none bg-muted/30"
             />
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
