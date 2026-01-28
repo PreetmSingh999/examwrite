@@ -56,7 +56,7 @@ const Index = () => {
         </div>
 
         {/* Editor */}
-        <div className="mb-6">
+        <div className="mb-8">
           <WritingEditor
             text={text}
             onChange={setText}
@@ -65,15 +65,20 @@ const Index = () => {
         </div>
 
         {/* AI Tools */}
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
-            <TextSummarizer text={text} />
+        <div className="space-y-6">
+          <div className="border-t border-border/50 pt-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">AI Writing Tools</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
+              <TextSummarizer text={text} />
+            </div>
           </div>
           
-          <AISuggestions text={text} />
+          <div className="border-t border-border/50 pt-4">
+            <AISuggestions text={text} />
+          </div>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-2">
             <Button
               variant="ghost"
               onClick={handleClear}
