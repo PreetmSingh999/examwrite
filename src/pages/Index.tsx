@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PenLine, RotateCcw } from 'lucide-react';
+import { PenLine, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { WritingEditor } from '@/components/WritingEditor';
 import { WritingStats } from '@/components/WritingStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -10,11 +10,13 @@ import { TextSummarizer } from '@/components/TextSummarizer';
 import { Button } from '@/components/ui/button';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useTheme } from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [text, setText] = useState('');
   const { stats, resetStats } = useWritingStats(text);
   const { isDark, toggleTheme } = useTheme();
+  const [showAITools, setShowAITools] = useState(false);
 
   const handleClear = () => {
     setText('');
@@ -23,7 +25,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
+      <div className="max-w-6xl mx-auto px-4 py-6 md:py-10">
         {/* Header */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-3">
@@ -55,30 +57,50 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Editor */}
-        <div className="mb-8">
-          <WritingEditor
-            text={text}
-            onChange={setText}
-            placeholder="Begin your writing journey here... The timer will start when you type and pause when you stop. Your words per minute will be calculated based on your active writing time."
-          />
-        </div>
-
-        {/* AI Tools */}
-        <div className="space-y-6">
-          <div className="border-t border-border/50 pt-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">AI Writing Tools</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+        {/* Main Content Area */}
+        <div className="flex gap-4 relative">
+          {/* AI Tools Panel - Left Side */}
+          <div
+            className={cn(
+              "transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0",
+              showAITools ? "w-80 opacity-100" : "w-0 opacity-0"
+            )}
+          >
+            <div className="w-80 space-y-4">
               <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
               <TextSummarizer text={text} />
             </div>
           </div>
-          
-          <div className="border-t border-border/50 pt-4">
-            <AISuggestions text={text} />
+
+          {/* Toggle Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowAITools(!showAITools)}
+            className="absolute -left-3 top-4 z-10 h-8 w-8 rounded-full shadow-md bg-background border-border"
+          >
+            {showAITools ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+
+          {/* Editor - Main Area */}
+          <div className="flex-1 min-w-0">
+            <WritingEditor
+              text={text}
+              onChange={setText}
+              placeholder="Begin your writing journey here... The timer will start when you type and pause when you stop. Your words per minute will be calculated based on your active writing time."
+            />
           </div>
+        </div>
+
+        {/* Grammar & Tips */}
+        <div className="mt-6 space-y-4">
+          <AISuggestions text={text} />
           
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center">
             <Button
               variant="ghost"
               onClick={handleClear}
