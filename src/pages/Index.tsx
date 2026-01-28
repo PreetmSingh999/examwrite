@@ -5,6 +5,8 @@ import { WritingStats } from '@/components/WritingStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { AISuggestions } from '@/components/AISuggestions';
 import { TimerGoal } from '@/components/TimerGoal';
+import { PassageGenerator } from '@/components/PassageGenerator';
+import { TextSummarizer } from '@/components/TextSummarizer';
 import { Button } from '@/components/ui/button';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useTheme } from '@/hooks/useTheme';
@@ -62,8 +64,13 @@ const Index = () => {
           />
         </div>
 
-        {/* Actions */}
+        {/* AI Tools */}
         <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <PassageGenerator onInsert={(passage) => setText(prev => prev ? `${prev}\n\n${passage}` : passage)} />
+            <TextSummarizer text={text} />
+          </div>
+          
           <AISuggestions text={text} />
           
           <div className="flex justify-center">
